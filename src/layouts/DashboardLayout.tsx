@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom'
 
 import { Sidebar } from '@/components/Sidebar'
 import { TabBar } from '@/components/TabBar'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 
 export function DashboardLayout() {
@@ -25,9 +26,10 @@ export function DashboardLayout() {
       )}
 
       <div className="flex flex-1 flex-col">
-        <header className="flex h-14 items-center gap-4 border-b px-4 md:px-6">
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSidebarOpen(!sidebarOpen)}>
-            {sidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+        <header className="flex h-9 items-center justify-end gap-2 border-b bg-muted/20 px-2">
+          <ThemeToggle />
+          <Button variant="ghost" size="icon" className="size-7 md:hidden" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            {sidebarOpen ? <X className="size-4" /> : <Menu className="size-4" />}
           </Button>
         </header>
         <TabBar />

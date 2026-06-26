@@ -6,6 +6,7 @@
  *   SUPABASE_MGMT_TOKEN  (sbp_...)
  *   SUPABASE_PROJECT_REF
  */
+import 'dotenv/config'
 import { readFileSync } from 'fs'
 
 const token = process.env.SUPABASE_MGMT_TOKEN

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 import { fetchPlans, type AdminFormData, type CompanyFormData } from '@/services/onboarding'
 import type { SusTip } from '@/types/database'
@@ -43,9 +44,11 @@ export function OnboardingPage() {
   const [admin, setAdmin] = useState<AdminFormData>(defaultAdmin)
 
   useEffect(() => {
-    fetchPlans()
-      .then(setPlans)
-      .catch(console.error)
+    supabase.auth.signOut().then(() => {
+      fetchPlans()
+        .then(setPlans)
+        .catch(console.error)
+    })
   }, [])
 
   const selectedPlan = plans.find((p) => p.ide === selectedPlanId) ?? null

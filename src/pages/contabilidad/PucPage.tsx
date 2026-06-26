@@ -276,17 +276,17 @@ export function PucPage() {
           </select>
         </div>
         <div className="h-8 w-px self-end bg-border" />
-        <Button variant="ghost" size="sm" className="gap-1 text-xs self-end" onClick={() => setShowNew(true)}>
-          <Plus className="size-3.5" /> Nuevo
+        <Button variant="ghost" size="icon" onClick={() => setShowNew(true)} title="Nuevo">
+          <Plus className="size-4" />
         </Button>
-        <Button variant="ghost" size="sm" className="gap-1 text-xs self-end" onClick={() => {}}>
-          <Search className="size-3.5" /> Busca
+        <Button variant="ghost" size="icon" onClick={() => {}} title="Buscar">
+          <Search className="size-4" />
         </Button>
-        <Button variant="ghost" size="sm" className="gap-1 text-xs self-end" disabled={!dirty || !selected} onClick={handleSave}>
-          <Save className="size-3.5" /> {saving ? 'Guardando...' : 'Grabar'}
+        <Button variant="ghost" size="icon" disabled={!dirty || !selected} onClick={handleSave} title={saving ? 'Guardando...' : 'Grabar'}>
+          <Save className="size-4" />
         </Button>
-        <Button variant="ghost" size="sm" className="gap-1 text-xs self-end text-destructive" disabled={!selected} onClick={handleDelete}>
-          <Trash2 className="size-3.5" /> Elimina
+        <Button variant="ghost" size="icon" className="text-destructive" disabled={!selected} onClick={handleDelete} title="Eliminar">
+          <Trash2 className="size-4" />
         </Button>
       </div>
 
@@ -377,7 +377,7 @@ export function PucPage() {
               <div>
                 <label className="block text-xs font-medium mb-1">Nombre</label>
                 <input type="text" value={newNombre} onChange={(e) => setNewNombre(e.target.value)}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="theme-input"
                   placeholder="Caja General" />
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">

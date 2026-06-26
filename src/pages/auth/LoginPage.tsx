@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
@@ -59,7 +59,7 @@ export function LoginPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="theme-input"
             placeholder="usuario@empresa.com"
           />
         </div>
@@ -74,7 +74,7 @@ export function LoginPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="theme-input"
             placeholder="••••••••"
           />
         </div>
@@ -91,12 +91,13 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
+      {/* Autoregistro deshabilitado */}
+      {/* <p className="text-center text-sm text-muted-foreground">
         ¿No tienes cuenta?{' '}
         <Link to="/onboarding" className="font-medium text-primary underline-offset-4 hover:underline">
           Crear empresa
         </Link>
-      </p>
+      </p> */}
     </div>
   )
 }

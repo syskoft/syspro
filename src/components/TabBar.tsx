@@ -2,14 +2,18 @@ import {
   BarChart3,
   BookOpen,
   Building2,
+  ClipboardList,
   CreditCard,
   FileText,
   LayoutDashboard,
   Monitor,
   Package,
+  Receipt,
+  Shield,
   UserCog,
   Users,
   UtensilsCrossed,
+  Wrench,
   X,
 } from 'lucide-react'
 import { type LucideIcon } from 'lucide-react'
@@ -21,7 +25,16 @@ import { cn } from '@/lib/utils'
 const tabInfo: Record<string, { label: string; icon: LucideIcon }> = {
   '/dashboard':             { label: 'Dashboard', icon: LayoutDashboard },
   '/dashboard/contabilidad':{ label: 'Contabilidad', icon: BookOpen },
+  '/dashboard/contabilidad/puc':   { label: 'Plan de Cuentas', icon: BookOpen },
+  '/dashboard/contabilidad/comprobantes': { label: 'Comprobantes', icon: FileText },
+  '/dashboard/contabilidad/libro-mayor':  { label: 'Libro Mayor', icon: BarChart3 },
+  '/dashboard/contabilidad/balance':      { label: 'Balance de Prueba', icon: CreditCard },
+  '/dashboard/contabilidad/definicion-cuentas': { label: 'Definición de Cuentas', icon: FileText },
   '/dashboard/facturacion': { label: 'Facturación', icon: FileText },
+  '/dashboard/catalogos':   { label: 'Catálogos', icon: ClipboardList },
+  '/dashboard/catalogos/articulos': { label: 'Artículos', icon: Package },
+  '/dashboard/catalogos/servicios': { label: 'Servicios', icon: Wrench },
+  '/dashboard/catalogos/impuestos': { label: 'Impuestos', icon: Receipt },
   '/dashboard/inventarios': { label: 'Inventarios', icon: Package },
   '/dashboard/pos':         { label: 'POS', icon: CreditCard },
   '/dashboard/restaurante': { label: 'Restaurante', icon: UtensilsCrossed },
@@ -30,6 +43,7 @@ const tabInfo: Record<string, { label: string; icon: LucideIcon }> = {
   '/dashboard/perfil':      { label: 'Mi Empresa', icon: Building2 },
   '/dashboard/usuarios':    { label: 'Usuarios', icon: UserCog },
   '/dashboard/admin':       { label: 'Panel de Administración', icon: Monitor },
+  '/dashboard/permisos':    { label: 'Permisos', icon: Shield },
 }
 
 export function TabBar() {
@@ -61,9 +75,13 @@ export function TabBar() {
   }
 
   useEffect(() => {
-    if (!tracked.includes(location.pathname)) {
-      setTracked((prev) => (prev.length < 10 ? [...prev, location.pathname] : prev))
-    }
+    setTracked((prev) =>
+      prev.includes(location.pathname)
+        ? prev
+        : prev.length < 10
+          ? [...prev, location.pathname]
+          : prev,
+    )
   }, [location.pathname])
 
   function closeTab(path: string) {
@@ -116,9 +134,10 @@ export function TabBar() {
         <button
           type="button"
           onClick={closeAll}
-          className="ml-auto shrink-0 px-2 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+          title="Cerrar todas"
+          className="ml-auto shrink-0 rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
         >
-          ✕ Cerrar todas
+          <X className="size-3.5" />
         </button>
       )}
     </div>

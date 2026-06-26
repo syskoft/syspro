@@ -1,3 +1,5 @@
+import { Save, X } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 
 export interface DataField {
@@ -7,7 +9,7 @@ export interface DataField {
   required?: boolean
   placeholder?: string
   options?: { value: string | number; label: string }[]
-  columns?: number
+  width?: 'sm' | 'md' | 'full'
 }
 
 interface Props {
@@ -20,12 +22,21 @@ interface Props {
   loading?: boolean
 }
 
+function getSpan(field: DataField): string {
+  const w = field.width ?? (field.type === 'number' ? 'sm' : field.type === 'select' ? 'md' : 'full')
+  switch (w) {
+    case 'sm':   return 'sm:col-span-1 lg:col-span-1'
+    case 'md':   return 'sm:col-span-1 lg:col-span-2'
+    case 'full':  return 'sm:col-span-2 lg:col-span-3'
+  }
+}
+
 export function DataForm({ fields, values, onChange, onSubmit, onCancel, submitLabel = 'Guardar', loading }: Props) {
   return (
     <div className="rounded-lg border bg-muted/30 p-4">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {fields.map((field) => (
-          <div key={field.key} style={field.columns === 1 ? { gridColumn: '1 / -1' } : undefined}>
+          <div key={field.key} className={getSpan(field)}>
             <label className="block text-xs font-medium mb-1">
               {field.label}
               {field.required && <span className="text-destructive ml-0.5">*</span>}
@@ -35,7 +46,7 @@ export function DataForm({ fields, values, onChange, onSubmit, onCancel, submitL
               <select
                 value={values[field.key] ?? ''}
                 onChange={(e) => onChange(field.key, field.options?.[0] && typeof field.options[0].value === 'number' ? Number(e.target.value) : e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="theme-input"
               >
                 <option value="">Seleccionar...</option>
                 {field.options?.map((o) => (
@@ -48,7 +59,7 @@ export function DataForm({ fields, values, onChange, onSubmit, onCancel, submitL
                 step="0.01"
                 value={values[field.key] ?? ''}
                 onChange={(e) => onChange(field.key, Number(e.target.value))}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="theme-input"
                 placeholder={field.placeholder}
                 required={field.required}
               />
@@ -57,7 +68,7 @@ export function DataForm({ fields, values, onChange, onSubmit, onCancel, submitL
                 type={field.type ?? 'text'}
                 value={values[field.key] ?? ''}
                 onChange={(e) => onChange(field.key, e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="theme-input"
                 placeholder={field.placeholder}
                 required={field.required}
               />
@@ -67,8 +78,8 @@ export function DataForm({ fields, values, onChange, onSubmit, onCancel, submitL
       </div>
 
       <div className="mt-3 flex justify-end gap-2">
-        {onCancel && <Button size="sm" variant="outline" onClick={onCancel}>Cancelar</Button>}
-        <Button size="sm" onClick={onSubmit} disabled={loading}>{loading ? 'Guardando...' : submitLabel}</Button>
+        {onCancel && <Button size="icon" variant="outline" onClick={onCancel} title="Cancelar"><X className="size-4" /></Button>}
+        <Button size="icon" onClick={onSubmit} disabled={loading} title={typeof submitLabel === 'string' ? submitLabel : 'Guardar'}><Save className="size-4" /></Button>
       </div>
     </div>
   )

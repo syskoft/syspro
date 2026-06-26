@@ -1,6 +1,5 @@
 import { supabase } from '@/lib/supabase'
 import type { SusTip } from '@/types/database'
-// NOTA: las tablas se renombraron: emp→empresas, sus_tip→tipos_suscripcion, emp_sub→suscripciones
 
 export interface CompanyFormData {
   ide_emp: string
@@ -40,31 +39,27 @@ export async function fetchPlans(): Promise<SusTip[]> {
 export async function createCompany(
   form: CompanyFormData,
 ): Promise<{ emp_ide: string }> {
-  const { data, error } = await supabase
-    .from('empresas')
-    .insert({
-      ide_emp: form.ide_emp,
-      nom_com: form.nom_com,
-      raz_soc: form.raz_soc,
-      dir: form.dir || null,
-      ciu: form.ciu || null,
-      dep: form.dep || null,
-      tel: form.tel || null,
-      tel_2: form.tel_2 || null,
-      tel_3: form.tel_3 || null,
-      rep_leg: form.rep_leg || null,
-      cc_rep_leg: form.cc_rep_leg || null,
-      per_ini_ano: form.per_ini_ano || null,
-      per_ini_mes: form.per_ini_mes || null,
-      pla_ctas: form.pla_ctas || null,
-      reg_tri: form.reg_tri || null,
-      imp_vtas: form.imp_vtas || null,
-    })
-    .select('emp_ide')
-    .single()
+  const { data, error } = await supabase.rpc('onboarding_create_empresa', {
+    p_ide_emp: form.ide_emp,
+    p_nom_com: form.nom_com,
+    p_raz_soc: form.raz_soc,
+    p_dir: form.dir || null,
+    p_ciu: form.ciu || null,
+    p_dep: form.dep || null,
+    p_tel: form.tel || null,
+    p_tel_2: form.tel_2 || null,
+    p_tel_3: form.tel_3 || null,
+    p_rep_leg: form.rep_leg || null,
+    p_cc_rep_leg: form.cc_rep_leg || null,
+    p_per_ini_ano: form.per_ini_ano || null,
+    p_per_ini_mes: form.per_ini_mes || null,
+    p_pla_ctas: form.pla_ctas || null,
+    p_reg_tri: form.reg_tri || null,
+    p_imp_vtas: form.imp_vtas || null,
+  })
 
   if (error) throw error
-  return data
+  return data as { emp_ide: string }
 }
 
 export async function createSubscription(
@@ -72,16 +67,10 @@ export async function createSubscription(
   sus_emp: number,
   num_mes: number,
 ): Promise<void> {
-  const fec_ini = new Date()
-  const fec_fin = new Date()
-  fec_fin.setMonth(fec_fin.getMonth() + num_mes)
-
-  const { error } = await supabase.from('suscripciones').insert({
-    emp_ide,
-    sus_emp,
-    fec_ini: fec_ini.toISOString().split('T')[0],
-    fec_fin: fec_fin.toISOString().split('T')[0],
-    num_mes,
+  const { error } = await supabase.rpc('onboarding_create_subscription', {
+    p_emp_ide: emp_ide,
+    p_sus_emp: sus_emp,
+    p_num_mes: num_mes,
   })
 
   if (error) throw error

@@ -75,11 +75,11 @@ export function FilterBar({ fields, onSearch, onClear, loading }: Props) {
       ))}
 
       <div className="flex items-center gap-2">
-        <Button type="submit" size="sm" disabled={loading}>
-          <Search className="size-3.5" /> Consultar
+        <Button type="submit" size="icon" disabled={loading} title="Consultar">
+          <Search className="size-4" />
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={handleClear}>
-          <RotateCcw className="size-3.5" /> Limpiar
+        <Button type="button" variant="outline" size="icon" onClick={handleClear} title="Limpiar">
+          <RotateCcw className="size-4" />
         </Button>
       </div>
     </form>

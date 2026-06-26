@@ -10,92 +10,118 @@
 ```
 src/
 ├── components/
-│   ├── ui/              ← shadcn/ui (Button, etc.)
-│   ├── CrudPage.tsx      ← CRUD completo (tabla + form + filtros + nuevo)
-│   ├── DataTable.tsx     ← tabla genérica con paginación y edición inline
-│   ├── DataForm.tsx      ← formulario genérico con labels y validación
-│   ├── FilterBar.tsx     ← barra de filtros con Consultar / Limpiar
-│   ├── TabBar.tsx        ← strip de pestañas múltiples con drag & close
-│   ├── AlertDialog.tsx   ← modal de confirmación/aviso reutilizable
-│   ├── StatusBadge.tsx   ← badge Activo/Inactivo + RoleBadge
-│   ├── SearchInput.tsx   ← input de búsqueda con lupa
-│   ├── Sidebar.tsx       ← sidebar con módulos y openTab()
+│   ├── ui/              ← shadcn/ui (Button)
+│   ├── CrudPage.tsx      ← CRUD completo con modal (crear + editar)
+│   ├── DataTable.tsx     ← tabla con paginación, inline edit, canDelete
+│   ├── DataForm.tsx      ← formulario con labels + widths dinámicos
+│   ├── FilterBar.tsx     ← filtros con Consultar / Limpiar
+│   ├── TabBar.tsx        ← pestañas con historial, drag & drop, cerrar
+│   ├── Modal.tsx         ← modal reutilizable con overlay + ESC
+│   ├── SuperBox.tsx      ← buscador/selector genérico (SuperBoxItem)
+│   ├── ModuleLauncher.tsx ← lanzador de submódulos (modal/page variant)
+│   ├── Permiso.tsx       ← wrapper para permisos por acción
+│   ├── EmpresaLogo.tsx   ← logo empresa con fallback de inicial
+│   ├── ThemeToggle.tsx   ← cambio claro/oscuro
+│   ├── AlertDialog.tsx   ← confirmación reutilizable
+│   ├── StatusBadge.tsx   ← StatusBadge + RoleBadge con colores
+│   ├── SearchInput.tsx   ← input con lupa
+│   ├── Sidebar.tsx       ← sidebar con módulos dinámicos (plan + permisos)
 │   └── ProtectedRoute.tsx
 ├── layouts/
-│   ├── AuthLayout.tsx    ← layout de login
-│   └── DashboardLayout.tsx ← layout con Sidebar + TabBar + contenido
+│   ├── AuthLayout.tsx
+│   └── DashboardLayout.tsx ← header + TabBar + Outlet
 ├── contexts/
-│   ├── AuthContext.tsx   ← autenticación (useAuth)
-│   └── TabContext.tsx    ← tabs múltiples (useTabs)
+│   └── AuthContext.tsx   ← useAuth()
 ├── hooks/
 │   ├── useAlert.tsx      ← confirm() / alert() basado en promesas
-│   └── useModuleContent.tsx ← mapa id → {label, icon, content}
+│   └── usePermiso.ts     ← usePermiso('articulos.crear') → boolean
 ├── pages/
 │   ├── auth/
 │   ├── dashboard/
 │   ├── contabilidad/
-│   ├── admin/
-│   │   ├── AdminPanel.tsx       ← panel con Tabs internos
+│   │   ├── ContabilidadPage.tsx    ← launcher con sub-módulos
+│   │   ├── PucPage.tsx
+│   │   └── DefinicionCuentasPage.tsx
+│   ├── catalogos/                  ← Catálogos (Art, Imp, Serv)
+│   │   ├── CatalogoPage.tsx
+│   │   ├── ArticulosPage.tsx       ← CRUD con impuestos multi-tarifa
+│   │   ├── ImpuestosPage.tsx       ← tarifas + config contable modal
+│   │   └── ServiciosPage.tsx       ← placeholder
+│   ├── admin/                      ← solo superadmin
+│   │   ├── AdminPanel.tsx          ← tabs internos
 │   │   ├── AdminEmpresasPage.tsx
 │   │   ├── AdminPlanesPage.tsx
 │   │   ├── AdminSuscripcionesPage.tsx
+│   │   ├── AdminModulosPlanPage.tsx
 │   │   └── AdminUsuariosPage.tsx
 │   ├── modules/
 │   ├── onboarding/
 │   └── settings/
-├── services/             ← API calls a Supabase
-│   ├── admin.ts          ← CRUD empresas, planes, suscripciones, usuarios
-│   ├── contabilidad.ts   ← PUC
-│   └── onboarding.ts     ← creación de empresa
+│       ├── CompanyProfilePage.tsx
+│       ├── UsersPage.tsx            ← CRUD usuarios + roles
+│       └── PermisosPage.tsx         ← permisos por usuario (modal)
+├── services/
+│   ├── admin.ts, contabilidad.ts, onboarding.ts
+│   ├── articulos.ts, impuestos.ts, empresa.ts
+│   └── permisos.ts
+├── data/
+│   └── subModules.ts               ← submódulos de Contabilidad, Catálogos
 ├── types/
-│   ├── database.ts       ← interfaces de tablas SQL
-│   └── contabilidad.ts   ← PUC
+│   ├── database.ts                  ← interfaces SQL
+│   └── contabilidad.ts              ← PucCuenta, PucConSaldo
 └── lib/
-    ├── supabase.ts       ← cliente Supabase
-    └── utils.ts          ← cn() function
+    ├── supabase.ts
+    └── utils.ts                     ← cn()
 ```
 
 ## Convenciones de código
 
 ### 1. Componentes base primero
-Siempre revisa `src/components/` antes de crear HTML repetitivo.
-
 | Necesitas | Usa |
 |---|---|
-| Tabla con CRUD | `<CrudPage>` |
-| Solo tabla (sin CRUD) | `<DataTable>` |
+| CRUD completo | `<CrudPage>` |
+| Solo tabla | `<DataTable>` |
 | Formulario | `<DataForm>` |
 | Filtros | `<FilterBar>` |
-| Tabs múltiples | `<TabBar>` + `useTabs()` |
+| Modal | `<Modal>` |
+| Buscador/Selector | `<SuperBox>` |
+| Launcher submódulos | `<ModuleLauncher>` |
+| Proteger por permiso | `<Permiso accion="x">` |
 | Badge activo/inactivo | `<StatusBadge>` |
-| Badge SUPERADMIN/Admin | `<RoleBadge>` |
-| Confirmación/aviso | `useAlert().confirm()` / `<AlertDialog>` |
-| Input con lupa | `<SearchInput>` |
+| Badge de rol | `<RoleBadge>` |
+| Logo empresa | `<EmpresaLogo>` |
+| Toggle claro/oscuro | `<ThemeToggle>` |
+| Tabs navegación | `<TabBar>` |
+| Confirmación | `<AlertDialog>` / `useAlert()` |
 
-### 2. CrudPage (para páginas admin con CRUD completo)
+### 2. CrudPage — props principales
 ```tsx
 <CrudPage
-  title="Empresas"
-  filterFields={[
-    { key: 'search', label: 'Buscar', placeholder: 'NIT o nombre...' },
-    { key: 'ina', label: 'Estado', type: 'select', options: [
-      { value: 'activas', label: 'Activas' },
-      { value: 'inactivas', label: 'Inactivas' },
-    ]},
-  ]}
-  onSearch={async (filters) => { setData(await fetchData(filters)) }}
-  onClear={() => setData([])}
-  fields={formFields}          ← DataForm fields
-  columns={columnDefs}         ← DataTable columns
+  title="Artículos"
+  filterFields={FilterField[]}
+  onSearch={handleSearch}
+  onClear={handleClear}
+  fields={DataField[]}
+  columns={DataColumn[]}
   data={items}
   loading={loading}
-  onCreate={async (vals) => { await create(vals); refetch() }}
-  onSave={async (row) => { await update(row.id, row); refetch() }}
-  onDelete={async (row) => { if (confirm(...)) { await del(row.id); refetch() } }}
+  onCreate={async (vals) => { ... }}
+  onSave={async (row) => { await update(row); refetch() }}
+  onDelete={async (row) => { ... }}
+  permisoCrear="articulos.crear"     ← Permiso wrapper automático
+  permisoEditar="articulos.editar"
+  permisoEliminar="articulos.eliminar"
+  canDelete={(row) => row.id !== userId}  ← deshabilita 🗑 por fila
+  renderModalContent={({ formVals, onChange, isEditing }) => ( ... )}
+  modalWidth="lg"
 />
 ```
+- Formulario de creación en **modal**
+- Formulario de edición en **modal** (click en ✎)
+- Errores se muestran dentro del modal (`error: string | null`)
+- `create` y `edit` tienen `try/catch` que captura errores
 
-### 3. DataTable - columnas
+### 3. DataTable — columnas
 ```tsx
 columns={[
   { key: 'codigo', label: 'Código' },
@@ -107,97 +133,122 @@ columns={[
   },
 ]}
 ```
-- `editable: true` → permite edición inline si hay `onSave`
-- `render` → custom display
-- `renderEdit` → custom editor cuando está en modo edición
-- Paginación automática (10/20/50/100)
-- Muestra "Total de registros: N"
+- `canDelete?: (row) => boolean` → deshabilita 🗑 si retorna false
+- `onEditClick?: (row) => void` → reemplaza inline edit con modal
+- `permisoEditar` / `permisoEliminar` → Permiso wrapper automático
 
-### 4. DataForm - campos
+### 4. DataForm — campos con width dinámico
 ```tsx
 fields={[
-  { key: 'nom_com', label: 'Nombre', required: true },
-  { key: 'ciu', label: 'Ciudad' },
-  { key: 'ina', label: 'Estado', type: 'select', options: [
-    { value: 'si', label: 'Inactivo' },
-  ]},
-  { key: 'valor', label: 'Valor', type: 'number' },
+  { key: 'codigo', label: 'Código', required: true },
+  { key: 'precio', label: 'Precio', type: 'number' },       // → width: 'sm' (25%)
+  { key: 'nombre', label: 'Nombre' },                         // → width: 'full' (75%)
+  { key: 'clase', label: 'Clase', type: 'select', options }   // → width: 'md' (50%)
 ]}
 ```
+- `number` → automático `width: 'sm'`
+- `select` → automático `width: 'md'`
+- `text` → automático `width: 'full'`
+- Grilla responsive: 1 col (mobile) → 2 (sm) → 4 (lg)
 
-### 5. FilterBar - filtros
+### 5. SuperBox — buscador genérico
 ```tsx
-<FilterBar
-  fields={[
-    { key: 'search', label: 'Buscar', placeholder: 'Texto...' },
-    { key: 'estado', label: 'Estado', type: 'select', options: [
-      { value: 'activos', label: 'Activos' },
-    ]},
-  ]}
-  onSearch={(values) => fetchData(values)}
-  onClear={() => setData([])}
+<SuperBox
+  value={selectedId}
+  items={items.map(i => ({ id: i.id, label: i.nombre, secondaryLabel: i.codigo }))}
+  onChange={(id) => setSelected(id)}
+  placeholder="Buscar..."
 />
 ```
-- No consulta automáticamente → el usuario debe hacer clic en "Consultar"
-- "Limpiar" resetea filtros y vacía resultados
+- Filtra mientras escribes por `label` y `secondaryLabel`
+- Input compacto con icono 🔍
+- Dropdown posicionado absoluto
 
-### 6. TabContext / TabBar (sistema multitabs)
+### 6. Permiso — wrapper de acciones
 ```tsx
-const { tabs, activeTab, collapsed, openTab, closeTab, setActive, toggleCollapse, setTabDirty } = useTabs()
-
-openTab('mi-modulo', 'Mi Módulo', <MiComponente />, <Icon size={14} />)
+<Permiso accion="articulos.crear">
+  <Button>Nuevo artículo</Button>
+</Permiso>
 ```
-- Máx 10 pestañas
-- Dashboard es fija (no cerrable)
-- Las pestañas mantienen su estado al cambiar (no se desmontan)
-- `setTabDirty(id, true, 'Mensaje')` → muestra confirmación al cerrar
-- `collapsed` → oculta todas las tabs excepto Dashboard
-- Drag & drop para reordenar
-- Persistencia en localStorage
+- `superadmin` → siempre pasa directo
+- `usuario sin permiso` → clona child con `disabled + title`
+- `accion=""` (vacío) → pasa directo
 
-### 7. AlertDialog / useAlert
+### 7. usePermiso — hook
 ```tsx
-// Como hook:
-const { confirm, alert, dialog } = useAlert()
-// Renderizar {dialog} en el JSX
-const ok = await confirm({ title: '¿Eliminar?', message: '...', confirmLabel: 'Eliminar' })
-
-// O como componente:
-<AlertDialog open={open} message="..." onConfirm={handleConfirm} onCancel={handleCancel} />
+const puedeEditar = usePermiso('articulos.editar')
+if (puedeEditar) { ... }
 ```
+- Superadmin → true
+- Normal → verifica `usuario_permisos` (cache en memoria)
 
 ### 8. Nombres de tablas en Supabase
-| Tabla | Nombre correcto |
+| Tabla | Nombre |
 |---|---|
 | Empresas | `empresas` |
 | Planes | `tipos_suscripcion` |
 | Suscripciones | `suscripciones` |
 | Usuarios | `usuarios` |
 | PUC | `puc_cuentas` |
+| Artículos | `articulos` |
+| Tarifas impuestos | `tarifas_impuestos` |
+| Permisos acciones | `permiso_acciones` |
+| Permisos x usuario | `usuario_permisos` |
+| Módulos sistema | `modulos_sistema` |
+| Módulos x plan | `plan_modulos` |
 
-### 9. Autenticación
-- `useAuth()` devuelve `{ user, session, profile, loading, signIn, signOut }`
-- `profile.role` es `'admin'` o `'superadmin'`
-- Proteger páginas admin: `if (profile?.role !== 'superadmin') return <p>Acceso no autorizado</p>`
+### 9. Migraciones SQL
+| # | Archivo | Contenido |
+|---|---|---|
+| 001 | `001_schema.sql` | esquema base (empresas, suscripciones, usuarios) |
+| 002 | `002_contabilidad.sql` | PUC + comprobantes (obsoleto, limpiado) |
+| 003-006 | Varios | renombres, limpieza, rename tables |
+| 007 | `007_puc_completo.sql` | PUC colombiano completo (834 cuentas) |
+| 008 | `008_puc_config.sql` | columna config JSONB |
+| 009 | `009_empresa_logo.sql` | logo_url en empresas |
+| 010 | `010_def_cuentas.sql` | definición de cuentas contables |
+| 011-012 | fixes RLS | correcciones políticas |
+| 013 | `013_onboarding_rpc.sql` | RPC para onboarding |
+| 014 | `014_modulos_sistema.sql` | módulos + plan_modulos |
+| 015 | `015_catalogos_modulo.sql` | Catálogos |
+| 016 | `016_articulos.sql` | tabla artículos |
+| 017 | `017_impuestos.sql` | clases, tarifas, config contable |
+| 018 | `018_articulo_impuestos.sql` | impuestos por artículo |
+| 019 | `019_permisos.sql` | acciones + permisos + trigger |
+| 020 | `020_admin_create_user.sql` | RPC crear usuario sin sesión |
 
-### 10. Estilos
-- Tailwind CSS v4 con `@theme inline` en `index.css`
-- Tema claro/oscuro via clase `.dark`
-- Usar variables CSS: `bg-card`, `border-input`, `text-muted-foreground`, etc.
-- Para clases condicionales: `cn()` de `@/lib/utils`
+### 10. Autenticación
+- `useAuth()` → `{ user, session, profile, loading, signIn, signOut }`
+- `profile.role`: `'superadmin'` | `'admin'` | `'operator'` | etc.
+- El usuario **actual** (`juansebastian@syskoft.com`) es el único `superadmin`
+- Al crear usuarios: el rol `superadmin` está bloqueado
+- Al editar: `superadmin` solo puede editarlo el usuario actual
 
-### 11. Cómo crear una página admin nueva
-1. Crear archivo en `src/pages/admin/`
-2. Definir `filterFields` para filtros
-3. Definir `fields` para el formulario de creación
-4. Definir `columns` para la tabla
-5. `handleSearch` llama a fetch con filtros (sin carga automática)
-6. `handleClear` vacía resultados
-7. Usar `<CrudPage>` con todas las props arriba
-8. Proteger con `if (profile?.role !== 'superadmin') return`
-9. Servicios van en `src/services/admin.ts`
+### 11. Roles disponibles
+| Rol | Badge | Descripción |
+|---|---|---|
+| `superadmin` | 🟣 Morado | Solo 1, acceso total |
+| `admin` | 🔵 Azul | Administrador |
+| `operator` | 🟢 Verde | Operador |
+| `consultant` | 🟠 Ámbar | Consultor |
+| `seller` | 🟦 Cian | Vendedor |
+| `warehouse` | 🟧 Naranja | Bodeguero |
 
-### 12. Cómo agregar un módulo nuevo al sistema de tabs
-1. Agregar entrada en `src/hooks/useModuleContent.tsx` → `useModuleContent()`
-2. El sidebar y el sistema de tabs lo detectan automáticamente
-3. Crear el componente de la página donde corresponda
+### 12. Estilos
+- Tailwind CSS v4 + variables `@theme inline`
+- Clases tema: `theme-input`, `theme-nav-item`, `theme-table-row`, etc.
+- Tema oscuro: inyecta `<style>` con `:root:root { ... }`
+- `cn()` de `@/lib/utils` para clases condicionales
+
+### 13. Cómo agregar un módulo con submódulos
+1. `src/data/subModules.ts` → agregar entrada
+2. `src/pages/[modulo]/[ModuloPage].tsx` → página con `ModuleLauncher variant="page"`
+3. `src/App.tsx` → ruta
+4. `src/components/TabBar.tsx` → label
+5. `supabase/migrations/XXX.sql` → agregar a `modulos_sistema` + `plan_modulos`
+
+### 14. Cómo crear una página admin (superadmin)
+1. Archivo en `src/pages/admin/`
+2. Servicios en `src/services/admin.ts`
+3. Usar `<CrudPage>` con filtros + formulario + tabla
+4. Hook guard después de todos los hooks: `if (profile?.role !== 'superadmin') return`

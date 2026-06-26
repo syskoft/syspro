@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, Pencil, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,8 @@ export interface DataColumn<T> {
   renderEdit?: (value: any, row: T, onChange: (val: any) => void) => React.ReactNode
 }
 
+import { Permiso } from '@/components/Permiso'
+
 interface Props<T extends Record<string, any>> {
   columns: DataColumn<T>[]
   data: T[]
@@ -20,6 +22,10 @@ interface Props<T extends Record<string, any>> {
   loading?: boolean
   onSave?: (row: T) => Promise<void>
   onDelete?: (row: T) => Promise<void>
+  onEditClick?: (row: T) => void
+  permisoEditar?: string
+  permisoEliminar?: string
+  canDelete?: (row: T) => boolean
   emptyMessage?: string
 }
 
@@ -32,6 +38,10 @@ export function DataTable<T extends Record<string, any>>({
   loading,
   onSave,
   onDelete,
+  onEditClick,
+  permisoEditar,
+  permisoEliminar,
+  canDelete,
   emptyMessage = 'No hay registros',
 }: Props<T>) {
   const [editing, setEditing] = useState<string | number | null>(null)
@@ -80,9 +90,9 @@ export function DataTable<T extends Record<string, any>>({
       <div className="rounded-lg border">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/50 text-left">
+            <tr className="theme-table-header">
               {columns.map((col) => (
-                <th key={col.key} className={cn('px-3 py-2 font-medium', col.width)} style={col.width ? { width: col.width } : undefined}>
+                <th key={col.key} className={cn('px-3 py-2', col.width)} style={col.width ? { width: col.width } : undefined}>
                   {col.label}
                 </th>
               ))}
@@ -100,7 +110,7 @@ export function DataTable<T extends Record<string, any>>({
                 const isEditing = editing === rowId
 
                 return (
-                  <tr key={rowId} className="border-b last:border-0 hover:bg-muted/50">
+                  <tr key={rowId} className="theme-table-row">
                     {columns.map((col) => (
                       <td key={col.key} className="px-3 py-2">
                         {isEditing && col.editable ? (
@@ -124,13 +134,27 @@ export function DataTable<T extends Record<string, any>>({
                       <td className="px-3 py-2">
                         {isEditing ? (
                           <div className="flex gap-1">
-                            <Button size="sm" variant="ghost" onClick={() => handleSave(row)} disabled={saving}>OK</Button>
-                            <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>X</Button>
+                            <Button size="sm" variant="ghost" onClick={() => handleSave(row)} disabled={saving} title="Guardar"><Check className="size-3.5" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => setEditing(null)} title="Cancelar"><X className="size-3.5" /></Button>
                           </div>
                         ) : (
                           <div className="flex gap-1">
-                            {onSave && <Button size="sm" variant="ghost" onClick={() => startEdit(row)}><Pencil className="size-3.5" /></Button>}
-                            {onDelete && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => onDelete(row)}><Trash2 className="size-3.5" /></Button>}
+                            {onSave && (
+                              <Permiso accion={permisoEditar ?? ''}>
+                                {onEditClick
+                                  ? <Button size="sm" variant="ghost" onClick={() => onEditClick(row)}><Pencil className="size-3.5" /></Button>
+                                  : <Button size="sm" variant="ghost" onClick={() => startEdit(row)}><Pencil className="size-3.5" /></Button>
+                                }
+                              </Permiso>
+                            )}
+                            {onDelete && (
+                              <Permiso accion={permisoEliminar ?? ''}>
+                                {canDelete && !canDelete(row)
+                                  ? <Button size="sm" variant="ghost" className="text-destructive" disabled title="No se puede eliminar este usuario"><Trash2 className="size-3.5" /></Button>
+                                  : <Button size="sm" variant="ghost" className="text-destructive" onClick={() => onDelete(row)}><Trash2 className="size-3.5" /></Button>
+                                }
+                              </Permiso>
+                            )}
                           </div>
                         )}
                       </td>
