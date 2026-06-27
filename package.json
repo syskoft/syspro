@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview",
-    "seed": "tsx scripts/seed-demo.ts",
+    "dev": "npx vite",
+    "build": "npx tsc -b && npx vite build",
+    "lint": "npx oxlint",
+    "preview": "npx vite preview",
+    "seed": "npx tsx scripts/seed-demo.ts",
     "push:deploy": "node scripts/deploy.mjs"
   },
   "dependencies": {

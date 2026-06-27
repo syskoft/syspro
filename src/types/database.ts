@@ -135,4 +135,17 @@ export interface ArticuloImpuesto {
   tarifa?: TarifaImpuesto
 }
 
+export interface ArticuloPrecio {
+  ide: number
+  emp_ide: string
+  articulo_ide: number
+  nombre: string
+  precio: number
+  incluye_impuesto: boolean
+  ina: boolean
+  created_at: string
+  updated_at: string
+  articulo?: Articulo
+}
+
 export type UserRole = 'admin' | 'superadmin'

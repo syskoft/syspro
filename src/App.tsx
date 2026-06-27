@@ -9,6 +9,7 @@ import { LoginPage } from '@/pages/auth/LoginPage'
 import { ArticulosPage } from '@/pages/catalogos/ArticulosPage'
 import { CatalogoPage } from '@/pages/catalogos/CatalogoPage'
 import { ImpuestosPage } from '@/pages/catalogos/ImpuestosPage'
+import { PreciosPage } from '@/pages/catalogos/PreciosPage'
 import { ServiciosPage } from '@/pages/catalogos/ServiciosPage'
 import { ContabilidadPage } from '@/pages/contabilidad/ContabilidadPage'
 import { DefinicionCuentasPage } from '@/pages/contabilidad/DefinicionCuentasPage'
@@ -40,6 +41,7 @@ function App() {
               <Route path="/dashboard/catalogos/articulos" element={<ArticulosPage />} />
               <Route path="/dashboard/catalogos/servicios" element={<ServiciosPage />} />
               <Route path="/dashboard/catalogos/impuestos" element={<ImpuestosPage />} />
+              <Route path="/dashboard/catalogos/precios" element={<PreciosPage />} />
               <Route path="/dashboard/contabilidad" element={<ContabilidadPage />} />
               <Route path="/dashboard/contabilidad/puc" element={<PucPage />} />
               <Route path="/dashboard/contabilidad/comprobantes" element={<ModulePlaceholder />} />

@@ -216,6 +216,8 @@ if (puedeEditar) { ... }
 | 018 | `018_articulo_impuestos.sql` | impuestos por artículo |
 | 019 | `019_permisos.sql` | acciones + permisos + trigger |
 | 020 | `020_admin_create_user.sql` | RPC crear usuario sin sesión |
+| 021 | `021_articulos_precios.sql` | Precios por artículo con impuestos |
+| 022 | `022_precios_permisos.sql` | Permisos para el módulo Precios |
 
 ### 10. Autenticación
 - `useAuth()` → `{ user, session, profile, loading, signIn, signOut }`

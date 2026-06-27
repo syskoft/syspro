@@ -27,6 +27,7 @@ const colorMap: Record<string, string> = {
   comprobantes: 'bg-blue-50 text-blue-600',
   'libro-mayor': 'bg-indigo-50 text-indigo-600',
   balance: 'bg-amber-50 text-amber-600',
+  precios: 'bg-green-50 text-green-700',
 }
 
 function Card({ item, onClick }: { item: SubModuleItem; onClick: () => void }) {
