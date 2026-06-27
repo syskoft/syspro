@@ -1,6 +1,17 @@
 import { supabase } from '@/lib/supabase'
 import type { Articulo, ArticuloImpuesto } from '@/types/database'
 
+export async function fetchArticulosAll(emp_ide: string): Promise<Pick<Articulo, 'ide' | 'codigo' | 'nombre' | 'ultimo_costo' | 'costo_promedio'>[]> {
+  const { data, error } = await supabase
+    .from('articulos')
+    .select('ide, codigo, nombre, ultimo_costo, costo_promedio')
+    .eq('emp_ide', emp_ide)
+    .eq('ina', false)
+    .order('codigo')
+  if (error) throw error
+  return data ?? []
+}
+
 export async function fetchArticulos(emp_ide: string, filters?: Record<string, string>): Promise<Articulo[]> {
   let query = supabase.from('articulos').select('*').eq('emp_ide', emp_ide).order('codigo')
   if (filters?.search) query = query.or(`codigo.ilike.%${filters.search}%,nombre.ilike.%${filters.search}%`)
@@ -14,7 +25,7 @@ export async function fetchArticulos(emp_ide: string, filters?: Record<string, s
 export async function fetchArticuloImpuestos(emp_ide: string, articuloIde: number): Promise<ArticuloImpuesto[]> {
   const { data, error } = await supabase
     .from('articulo_impuestos')
-    .select('*, tarifa: tarifa_id(*)')
+    .select('*')
     .eq('emp_ide', emp_ide)
     .eq('articulo_ide', articuloIde)
   if (error) throw error

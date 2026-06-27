@@ -109,6 +109,8 @@ export interface Articulo {
   unidades_presentacion: number
   precio: number
   precio_pos: number
+  ultimo_costo: number
+  costo_promedio: number
   ina: boolean
   created_at: string
   updated_at: string
@@ -125,6 +127,29 @@ export interface PermisoAccion {
 export interface UsuarioPermiso {
   usuario_id: string
   accion_codigo: string
+}
+
+export interface ListaPrecio {
+  ide: number
+  emp_ide: string
+  nombre: string
+  descripcion: string | null
+  ina: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ListaPrecioItem {
+  ide: number
+  emp_ide: string
+  lista_ide: number
+  articulo_ide: number
+  tipo: 'fijo' | 'porcentual'
+  valor: number
+  ina: boolean
+  created_at: string
+  updated_at: string
+  articulo?: Articulo
 }
 
 export interface ArticuloImpuesto {

@@ -218,6 +218,9 @@ if (puedeEditar) { ... }
 | 020 | `020_admin_create_user.sql` | RPC crear usuario sin sesión |
 | 021 | `021_articulos_precios.sql` | Precios por artículo con impuestos |
 | 022 | `022_precios_permisos.sql` | Permisos para el módulo Precios |
+| 023 | `023_listas_precios.sql` | Catálogo de listas de precios + items |
+| 024 | `024_cleanup.sql` | Agregar costos a articulos, eliminar articulos_precios |
+| 025 | `025_permisos_listas_precios.sql` | Permisos para Listas de Precios |
 
 ### 10. Autenticación
 - `useAuth()` → `{ user, session, profile, loading, signIn, signOut }`
