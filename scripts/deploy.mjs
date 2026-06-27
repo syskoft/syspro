@@ -33,7 +33,11 @@ function restoreEnv() {
   if (!existsSync(dst) && existsSync(ENV_BAK)) cpSync(ENV_BAK, dst)
 }
 
-// 1. Build
+// 1. Ensure deps are installed (git operations on Windows destroy node_modules)
+console.log('\n=== INSTALLING DEPS ===')
+run('npm install')
+
+// 2. Build
 console.log('\n=== BUILDING ===')
 run('node node_modules/typescript/bin/tsc -b && node node_modules/vite/bin/vite.js build')
 
