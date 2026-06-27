@@ -41,8 +41,6 @@ export function UsersPage() {
     setLoading(false)
   }, [profile])
 
-  useEffect(() => { load() }, [load])
-
   useEffect(() => {
     supabase.from('empresas').select('emp_ide, nom_com').order('nom_com').then(({ data }) => {
       if (data) setEmpresas(data)

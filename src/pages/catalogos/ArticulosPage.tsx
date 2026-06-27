@@ -50,7 +50,7 @@ export function ArticulosPage() {
     } finally { setLoading(false) }
   }, [profile?.emp_ide])
 
-  useEffect(() => { loadData() }, [loadData])
+  useEffect(() => { if (profile?.emp_ide) fetchTarifas(profile.emp_ide).then(setTarifas) }, [profile?.emp_ide])
 
   function handleSearch(filters: Record<string, string>) { loadData(filters) }
   function handleClear() { setArticulos([]) }

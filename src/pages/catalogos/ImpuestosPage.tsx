@@ -66,7 +66,12 @@ export function ImpuestosPage() {
     }
   }, [profile?.emp_ide])
 
-  useEffect(() => { loadTarifas() }, [loadTarifas])
+  useEffect(() => {
+    if (profile?.emp_ide) {
+      fetchClases().then(setClases)
+      fetchPuc(profile.emp_ide).then(setCuentasPuc)
+    }
+  }, [profile?.emp_ide])
 
   function handleSearch(filters: Record<string, string>) { loadTarifas(filters) }
   function handleClear() { setTarifas([]) }
