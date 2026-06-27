@@ -131,23 +131,34 @@ export function ArticulosPage() {
 
   async function openPriceEditor(articulo: Articulo) {
     if (!profile?.emp_ide) return
-    const imp = await fetchArticuloImpuestos(profile.emp_ide, articulo.ide)
-    const precios = await fetchPreciosArticulo(profile.emp_ide, articulo.ide)
-    setEditPrecios({
-      articuloIde: articulo.ide,
-      articuloNombre: articulo.nombre,
-      precios: precios.map((p) => ({ nombre: p.nombre, precio: Number(p.precio), incluye_impuesto: p.incluye_impuesto })),
-      taxIds: imp.map((i) => i.tarifa_id),
-    })
+    try {
+      const [imp, precios] = await Promise.all([
+        fetchArticuloImpuestos(profile.emp_ide, articulo.ide),
+        fetchPreciosArticulo(profile.emp_ide, articulo.ide),
+      ])
+      setEditPrecios({
+        articuloIde: articulo.ide,
+        articuloNombre: articulo.nombre,
+        precios: precios.map((p) => ({ nombre: p.nombre, precio: Number(p.precio), incluye_impuesto: p.incluye_impuesto })),
+        taxIds: imp.map((i) => i.tarifa_id),
+      })
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al cargar precios')
+    }
   }
 
   async function saveEditPrices() {
     if (!profile?.emp_ide || !editPrecios) return
     setSaving(true)
-    await savePreciosArticulo(profile.emp_ide, editPrecios.articuloIde, editPrecios.precios)
-    setEditPrecios(null)
-    setSaving(false)
-    loadData()
+    try {
+      await savePreciosArticulo(profile.emp_ide, editPrecios.articuloIde, editPrecios.precios)
+      setEditPrecios(null)
+      loadData()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Error al guardar precios')
+    } finally {
+      setSaving(false)
+    }
   }
 
   function addPrecioRow() {
