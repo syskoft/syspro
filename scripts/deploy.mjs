@@ -42,7 +42,7 @@ saveEnv()
 
 // 3. Build
 console.log('\n=== BUILDING ===')
-run('node node_modules/typescript/bin/tsc -b && node node_modules/vite/bin/vite.js build')
+run('npm run build')
 
 // 4. Copy dist to temp
 console.log('\n=== COPYING BUILD TO TEMP ===')
