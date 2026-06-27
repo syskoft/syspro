@@ -22,6 +22,17 @@ function cleanTemp() {
   if (existsSync(TEMP)) rmSync(TEMP, { recursive: true, force: true })
 }
 
+// Save .env content before we do anything destructive
+const ENV_BAK = join(TEMP, '__env__')
+function saveEnv() {
+  const src = join(REPO, '.env')
+  if (existsSync(src)) cpSync(src, ENV_BAK)
+}
+function restoreEnv() {
+  const dst = join(REPO, '.env')
+  if (!existsSync(dst) && existsSync(ENV_BAK)) cpSync(ENV_BAK, dst)
+}
+
 // 1. Build (use direct paths to avoid node_modules/.bin corruption on Windows)
 console.log('\n=== BUILDING ===')
 run('node node_modules/typescript/bin/tsc -b && node node_modules/vite/bin/vite.js build')
@@ -31,6 +42,7 @@ console.log('\n=== COPYING BUILD TO TEMP ===')
 cleanTemp()
 mkdirSync(TEMP, { recursive: true })
 cpSync(join(REPO, 'dist'), TEMP, { recursive: true })
+saveEnv()
 
 // 3. Stash any local changes on main
 const status = runSilent('git status --porcelain')
@@ -46,6 +58,7 @@ try {
   const tracked = runSilent('git ls-files').split('\n').filter(Boolean)
   if (tracked.length > 0) run('git rm -r --ignore-unmatch .')
   run('git clean -fd')
+  restoreEnv()
 
   // 6. Copy build files
   console.log('\n=== COPYING BUILD ===')
@@ -53,16 +66,21 @@ try {
     cpSync(join(TEMP, f), join(REPO, f), { recursive: true })
   }
 
-  // 7. Commit & push
+  // 7. Commit & push (skip if nothing changed)
   console.log('\n=== COMMITTING & PUSHING ===')
   run('git add -A')
-  const date = new Date().toISOString().slice(0, 16).replace('T', ' ')
-  run(`git commit -m "deploy: build ${date}"`)
-  run(`git push origin ${BRANCH}`)
-
-  console.log('\n\u2705 Deploy successful!')
+  const hasChanges = runSilent('git status --porcelain').length > 0
+  if (hasChanges) {
+    const date = new Date().toISOString().slice(0, 16).replace('T', ' ')
+    run(`git commit -m "deploy: build ${date}"`)
+    run(`git push origin ${BRANCH}`)
+    console.log('\n\u2705 Deploy successful!')
+  } else {
+    console.log('\n\u2139\uFE0F No changes to deploy (same build as last commit)')
+  }
 } finally {
   // 8. Always go back to main (force to discard any leftover changes in deploy)
+  restoreEnv()
   cleanTemp()
   runSilent('git checkout --force main 2>nul')
   run('git checkout main 2>nul')
