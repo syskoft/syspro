@@ -37,16 +37,19 @@ function restoreEnv() {
 console.log('\n=== INSTALLING DEPS ===')
 run('npm install')
 
-// 2. Build
+// 2. Save .env immediately (build will use it from filesystem, backup protects against git clean)
+saveEnv()
+
+// 3. Build
 console.log('\n=== BUILDING ===')
 run('node node_modules/typescript/bin/tsc -b && node node_modules/vite/bin/vite.js build')
 
-// 2. Copy dist + .env to temp
+// 4. Copy dist to temp
 console.log('\n=== COPYING BUILD TO TEMP ===')
 cleanTemp()
 mkdirSync(TEMP, { recursive: true })
 cpSync(join(REPO, 'dist'), TEMP, { recursive: true })
-saveEnv()
+// Re-save .env backup (build reads from filesystem, backup is already done above)
 
 // 3. Stash any WIP changes on main
 const status = runSilent('git status --porcelain')
