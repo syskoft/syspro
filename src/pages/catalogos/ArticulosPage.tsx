@@ -1,4 +1,4 @@
-import { Receipt, Save, X } from 'lucide-react'
+import { DollarSign, Receipt, Save, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { useAuth } from '@/contexts/AuthContext'
 import { createArticulo, deleteArticulo, fetchArticuloImpuestos, fetchArticulos, saveArticuloImpuestos, updateArticulo } from '@/services/articulos'
 import { fetchTarifas } from '@/services/impuestos'
+import { fetchPreciosArticulo, savePreciosArticulo, type PrecioInput } from '@/services/precios'
 import type { Articulo, TarifaImpuesto } from '@/types/database'
 
 const fmt = (n: number) => '$' + n.toLocaleString('es-CO', { minimumFractionDigits: 2 })
@@ -35,6 +36,7 @@ export function ArticulosPage() {
   const [loading, setLoading] = useState(false)
   const [selectedTaxes, setSelectedTaxes] = useState<number[]>([])
   const [editTax, setEditTax] = useState<{ articuloIde: number; articuloNombre: string; tarifaIds: number[] } | null>(null)
+  const [editPrecios, setEditPrecios] = useState<{ articuloIde: number; articuloNombre: string; precios: PrecioInput[]; taxIds: number[] } | null>(null)
   const [saving, setSaving] = useState(false)
 
   const loadData = useCallback(async (f?: Record<string, string>) => {
@@ -70,6 +72,17 @@ export function ArticulosPage() {
   function calcPos(precio: number, taxIds: number[]): number {
     const total = taxIds.reduce((s, id) => s + (tarifas.find((x) => x.ide === id)?.porcentaje ?? 0), 0)
     return Math.round(precio * (1 + total / 100) * 100) / 100
+  }
+
+  function calcFinal(precio: number, incluyeImpuesto: boolean, taxes: TarifaImpuesto[]) {
+    const taxPct = taxes.reduce((s, t) => s + (t.porcentaje ?? 0), 0)
+    if (incluyeImpuesto) {
+      const base = Math.round((precio / (1 + taxPct / 100)) * 100) / 100
+      const taxAmount = Math.round((precio - base) * 100) / 100
+      return { taxPct, taxAmount, total: precio }
+    }
+    const taxAmount = Math.round((precio * taxPct / 100) * 100) / 100
+    return { taxPct, taxAmount, total: precio + taxAmount }
   }
 
   async function handleCreate(vals: Record<string, any>) {
@@ -116,6 +129,50 @@ export function ArticulosPage() {
     loadData()
   }
 
+  async function openPriceEditor(articulo: Articulo) {
+    if (!profile?.emp_ide) return
+    const imp = await fetchArticuloImpuestos(profile.emp_ide, articulo.ide)
+    const precios = await fetchPreciosArticulo(profile.emp_ide, articulo.ide)
+    setEditPrecios({
+      articuloIde: articulo.ide,
+      articuloNombre: articulo.nombre,
+      precios: precios.map((p) => ({ nombre: p.nombre, precio: Number(p.precio), incluye_impuesto: p.incluye_impuesto })),
+      taxIds: imp.map((i) => i.tarifa_id),
+    })
+  }
+
+  async function saveEditPrices() {
+    if (!profile?.emp_ide || !editPrecios) return
+    setSaving(true)
+    await savePreciosArticulo(profile.emp_ide, editPrecios.articuloIde, editPrecios.precios)
+    setEditPrecios(null)
+    setSaving(false)
+    loadData()
+  }
+
+  function addPrecioRow() {
+    if (!editPrecios) return
+    setEditPrecios({
+      ...editPrecios,
+      precios: [...editPrecios.precios, { nombre: '', precio: 0, incluye_impuesto: false }],
+    })
+  }
+
+  function updatePrecioRow(idx: number, field: keyof PrecioInput, value: any) {
+    if (!editPrecios) return
+    const precios = [...editPrecios.precios]
+    precios[idx] = { ...precios[idx], [field]: value }
+    setEditPrecios({ ...editPrecios, precios })
+  }
+
+  function removePrecioRow(idx: number) {
+    if (!editPrecios) return
+    setEditPrecios({
+      ...editPrecios,
+      precios: editPrecios.precios.filter((_, i) => i !== idx),
+    })
+  }
+
   const columns = [
     { key: 'codigo', label: 'Código', editable: true },
     { key: 'nombre', label: 'Nombre', editable: true },
@@ -131,10 +188,15 @@ export function ArticulosPage() {
       ),
     },
     { key: 'precio_pos', label: 'POS', render: (v: any) => fmt(v) },
-    { key: 'ide', label: 'Imp', render: (_v: any, row: any) => (
-      <button type="button" onClick={() => openTaxEditor(row)} className="rounded p-1 text-muted-foreground hover:bg-accent" title="Editar impuestos">
-        <Receipt className="size-3.5" />
-      </button>
+    { key: 'ide', label: 'Acciones', render: (_v: any, row: any) => (
+      <div className="flex gap-1">
+        <button type="button" onClick={() => openTaxEditor(row)} className="rounded p-1 text-muted-foreground hover:bg-accent" title="Editar impuestos">
+          <Receipt className="size-3.5" />
+        </button>
+        <button type="button" onClick={() => openPriceEditor(row)} className="rounded p-1 text-muted-foreground hover:bg-accent" title="Configurar precios">
+          <DollarSign className="size-3.5" />
+        </button>
+      </div>
     )},
     { key: 'ina', label: 'Estado', render: (v: any) => <StatusBadge active={!v} />,
       renderEdit: (v: any, _: any, onChange: any) => (
@@ -241,6 +303,86 @@ export function ArticulosPage() {
             <div className="mt-4 flex justify-end gap-2">
               <Button size="sm" variant="outline" onClick={() => setEditTax(null)}>Cancelar</Button>
               <Button size="sm" onClick={saveEditTax} disabled={saving}><Save className="size-4" /> Guardar</Button>
+            </div>
+          </>
+        )}
+      </Modal>
+
+      <Modal open={!!editPrecios} onClose={() => setEditPrecios(null)} title={`Precios — ${editPrecios?.articuloNombre ?? ''}`} width="lg">
+        {editPrecios && (
+          <>
+            <div className="mb-3 flex items-center justify-between">
+              <Button size="sm" variant="outline" onClick={addPrecioRow} title="Agregar precio">
+                + Agregar precio
+              </Button>
+            </div>
+            {editPrecios.precios.length === 0 ? (
+              <p className="py-4 text-center text-sm text-muted-foreground">Sin precios configurados</p>
+            ) : (
+              <div className="overflow-x-auto rounded-lg border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+                      <th className="px-3 py-2 w-44">Nombre</th>
+                      <th className="px-3 py-2 w-28">Valor</th>
+                      <th className="px-3 py-2 w-24 text-center">C/Imp</th>
+                      <th className="px-3 py-2 w-36 text-right">Precio Final</th>
+                      <th className="px-3 py-2 w-10"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {editPrecios.precios.map((p, idx) => {
+                      const relevantTaxes = tarifas.filter((t) => editPrecios.taxIds.includes(t.ide))
+                      const c = p.precio > 0 ? calcFinal(p.precio, p.incluye_impuesto, relevantTaxes) : null
+                      return (
+                        <tr key={idx} className="border-b last:border-0 hover:bg-muted/30">
+                          <td className="px-3 py-1.5">
+                            <input type="text" value={p.nombre}
+                              onChange={(e) => updatePrecioRow(idx, 'nombre', e.target.value)}
+                              className="w-full rounded border border-input bg-background px-2 py-1 text-xs"
+                              placeholder="Ej: Minorista" />
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <input type="number" step="0.01" value={p.precio}
+                              onChange={(e) => updatePrecioRow(idx, 'precio', Number(e.target.value))}
+                              className="w-full rounded border border-input bg-background px-2 py-1 text-right text-xs" />
+                          </td>
+                          <td className="px-3 py-1.5 text-center">
+                            <input type="checkbox"
+                              checked={p.incluye_impuesto}
+                              onChange={(e) => updatePrecioRow(idx, 'incluye_impuesto', e.target.checked)}
+                              className="size-4 accent-primary" />
+                          </td>
+                          <td className="px-3 py-1.5 text-right">
+                            {c ? (
+                              <div>
+                                <span className="font-medium">{fmt(c.total)}</span>
+                                {c.taxPct > 0 && (
+                                  <span className="ml-1 text-[10px] text-muted-foreground">
+                                    ({c.taxPct}% = {fmt(c.taxAmount)})
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">-</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-1.5">
+                            <button type="button" onClick={() => removePrecioRow(idx)}
+                              className="rounded p-1 text-muted-foreground hover:text-destructive" title="Eliminar">
+                              <X className="size-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="mt-4 flex justify-end gap-2">
+              <Button size="sm" variant="outline" onClick={() => setEditPrecios(null)}>Cancelar</Button>
+              <Button size="sm" onClick={saveEditPrices} disabled={saving}><Save className="size-4" /> Guardar</Button>
             </div>
           </>
         )}

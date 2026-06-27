@@ -1,4 +1,4 @@
-import { BookOpen, DollarSign, Package, Receipt, Settings, Wrench } from 'lucide-react'
+import { BookOpen, Package, Receipt, Settings, Wrench } from 'lucide-react'
 
 import type { SubModuleItem } from '@/components/ModuleLauncher'
 
@@ -9,7 +9,6 @@ export const subModules: Record<string, SubModuleItem[]> = {
   ],
   catalogos: [
     { id: 'articulos', label: 'Artículos', description: 'Gestión de productos y artículos', icon: Package, href: '/dashboard/catalogos/articulos' },
-    { id: 'precios', label: 'Precios', description: 'Precios por artículo con impuestos', icon: DollarSign, href: '/dashboard/catalogos/precios' },
     { id: 'servicios', label: 'Servicios', description: 'Gestión de servicios', icon: Wrench, href: '/dashboard/catalogos/servicios' },
     { id: 'impuestos', label: 'Impuestos', description: 'Tarifas y configuración contable', icon: Receipt, href: '/dashboard/catalogos/impuestos' },
   ],
