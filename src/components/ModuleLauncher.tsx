@@ -1,5 +1,5 @@
-import { X, type LucideIcon } from 'lucide-react'
-import { useEffect } from 'react'
+import { Search, X, type LucideIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { cn } from '@/lib/utils'
@@ -18,6 +18,7 @@ interface Props {
   onClose?: () => void
   title: string
   items: SubModuleItem[]
+  searchable?: boolean
 }
 
 const defaultColors = 'bg-muted text-muted-foreground'
@@ -44,33 +45,38 @@ function Card({ item, onClick }: { item: SubModuleItem; onClick: () => void }) {
   )
 }
 
-export function ModuleLauncher({ variant = 'modal', open, onClose, title, items }: Props) {
+export function ModuleLauncher({ variant = 'modal', open, onClose, title, items, searchable }: Props) {
   const navigate = useNavigate()
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     if (variant !== 'modal' || !open) return
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose?.()
-    }
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose?.() }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [variant, open, onClose])
 
-  function handleClick(href: string) {
-    navigate(href)
-    if (variant === 'modal') onClose?.()
-  }
+  useEffect(() => { setSearch('') }, [items])
 
-  // Variante page: inline sin overlay
+  function handleClick(href: string) { navigate(href); if (variant === 'modal') onClose?.() }
+
+  const filtered = search ? items.filter((i) => i.label.toLowerCase().includes(search.toLowerCase()) || i.description.toLowerCase().includes(search.toLowerCase())) : items
+
   if (variant === 'page') {
     return (
       <div>
-        <h1 className="mb-6 text-2xl font-bold">{title}</h1>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
-            <Card key={item.id} item={item} onClick={() => handleClick(item.href)} />
-          ))}
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold">{title}</h1>
+          {searchable && (
+            <div className="relative w-64"><Search className="absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nombre o descripcion..." className="h-9 w-full rounded-md border border-input bg-background pl-8 pr-3 text-sm outline-none" />
+            </div>
+          )}
         </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((item) => (<Card key={item.id} item={item} onClick={() => handleClick(item.href)} />))}
+        </div>
+        {filtered.length === 0 && search && <p className="py-8 text-center text-sm text-muted-foreground">Sin resultados para "{search}"</p>}
       </div>
     )
   }

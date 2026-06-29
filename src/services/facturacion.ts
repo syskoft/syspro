@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { ComprobanteTipo, Factura, FacturaItem, FacturacionConfig, FormaPago, Tercero, TipoComprobante, Vendedor } from '@/types/database'
+import type { ComprobanteTipo, Factura, FacturaItem, FacturacionConfig, FormaPago, Tercero, TipoComprobante } from '@/types/database'
 
 // ── Tipos de comprobante ──────────────────────────
 export async function fetchTiposComp(): Promise<TipoComprobante[]> {
