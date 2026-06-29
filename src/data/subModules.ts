@@ -10,6 +10,9 @@ export const subModules: Record<string, SubModuleItem[]> = {
     { id: 'fp', label: 'Factura de Venta POS', description: 'Facturación rápida desde punto de venta', icon: CreditCard, href: '/dashboard/pos/nueva/FP' },
     { id: 'pp', label: 'Pedido POS', description: 'Pedido registrado desde punto de venta', icon: ClipboardList, href: '/dashboard/pos/nueva/PP' },
   ],
+  procesos: [
+    { id: 'log-eventos', label: 'Log de Eventos', description: 'Registro de acciones realizadas en el sistema', icon: Search, href: '/dashboard/procesos/log-eventos' },
+  ],
   utilidades: [
     { id: 'comprobantes', label: 'Comprobantes', description: 'Visualización de comprobantes, items y contabilización', icon: Search, href: '/dashboard/utilidades/comprobantes' },
   ],

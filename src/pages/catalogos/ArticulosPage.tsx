@@ -6,6 +6,7 @@ import { CrudPage } from '@/components/CrudPage'
 import { Modal } from '@/components/Modal'
 import { StatusBadge } from '@/components/StatusBadge'
 import { useAuth } from '@/contexts/AuthContext'
+import { useAlertContext } from '@/hooks/AlertProvider'
 import { createArticulo, deleteArticulo, fetchArticuloImpuestos, fetchArticulos, saveArticuloImpuestos, updateArticulo } from '@/services/articulos'
 import { fetchTarifas } from '@/services/impuestos'
 import type { Articulo, TarifaImpuesto } from '@/types/database'
@@ -96,9 +97,17 @@ export function ArticulosPage() {
 
   async function handleDelete(row: Articulo) {
     if (!profile?.emp_ide) return
-    if (!confirm(`¿Eliminar ${row.nombre}?`)) return
-    await deleteArticulo(profile.emp_ide, row.ide)
-    loadData()
+    const { confirm } = useAlertContext()
+    if (!await confirm({ message: `¿Eliminar ${row.nombre}?`, confirmLabel: 'Eliminar' })) return
+    try {
+      await deleteArticulo(profile.emp_ide, row.ide)
+      loadData()
+    } catch (err: any) {
+      if (err?.code === '23503' || (err?.message ?? '').includes('foreign key')) {
+        throw new Error('Este artículo tiene movimientos asociados y no puede ser eliminado.')
+      }
+      throw err
+    }
   }
 
   async function openTaxEditor(articulo: Articulo) {

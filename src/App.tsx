@@ -31,6 +31,8 @@ import { ModulePlaceholder } from '@/pages/modules/ModulePlaceholder'
 import { OnboardingPage } from '@/pages/onboarding/OnboardingPage'
 import { PosPage } from '@/pages/pos/PosPage'
 import { POSFacturaPage } from '@/pages/pos/POSFacturaPage'
+import { ProcesosPage } from '@/pages/procesos/ProcesosPage'
+import { LogEventosPage } from '@/pages/procesos/LogEventosPage'
 import { PermisosPage } from '@/pages/settings/PermisosPage'
 import { CompanyProfilePage } from '@/pages/settings/CompanyProfilePage'
 import { UsersPage } from '@/pages/settings/UsersPage'
@@ -84,6 +86,8 @@ function App() {
               <Route path="/dashboard/informes/facturas/:id" element={<FacturaDetallePage />} />
               <Route path="/dashboard/utilidades" element={<UtilidadesPage />} />
               <Route path="/dashboard/utilidades/comprobantes" element={<ComprobantesPage />} />
+              <Route path="/dashboard/procesos" element={<ProcesosPage />} />
+              <Route path="/dashboard/procesos/log-eventos" element={<LogEventosPage />} />
               <Route path="/dashboard/admin" element={<AdminPanel />} />
             </Route>
           </Route>

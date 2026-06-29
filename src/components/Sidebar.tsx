@@ -31,6 +31,7 @@ const ALL_MODULES = [
   { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { id: 'facturacion', label: 'Transacciones', href: '/dashboard/facturacion', icon: FileText },
   { id: 'utilidades', label: 'Utilidades', href: '/dashboard/utilidades', icon: Search },
+  { id: 'procesos', label: 'Procesos', href: '/dashboard/procesos', icon: ClipboardList },
   { id: 'catalogos', label: 'Catálogos', href: '/dashboard/catalogos', icon: ClipboardList },
   { id: 'contabilidad', label: 'Contabilidad', href: '/dashboard/contabilidad', icon: BookOpen },
   { id: 'inventarios', label: 'Inventarios', href: '/dashboard/inventarios', icon: Package },

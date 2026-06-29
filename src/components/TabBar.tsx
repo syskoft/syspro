@@ -44,6 +44,8 @@ const tabInfo: Record<string, { label: string; icon: LucideIcon }> = {
   '/dashboard/facturacion/config': { label: 'Config Contable', icon: Settings },
   '/dashboard/utilidades': { label: 'Utilidades', icon: Search },
   '/dashboard/utilidades/comprobantes': { label: 'Comprobantes', icon: Search },
+  '/dashboard/procesos': { label: 'Procesos', icon: ClipboardList },
+  '/dashboard/procesos/log-eventos': { label: 'Log de Eventos', icon: Search },
   '/dashboard/catalogos':   { label: 'Catálogos', icon: ClipboardList },
   '/dashboard/catalogos/articulos': { label: 'Artículos', icon: Package },
   '/dashboard/catalogos/servicios': { label: 'Servicios', icon: Wrench },

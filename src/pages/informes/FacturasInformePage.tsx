@@ -2,12 +2,16 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DataTable, type DataColumn } from '@/components/DataTable'; import { FilterBar } from '@/components/FilterBar'
 import { StatusBadge } from '@/components/StatusBadge'; import { useAuth } from '@/contexts/AuthContext'
-import { fetchFacturas, fetchTiposComp, fmtNum } from '@/services/facturacion'; import { supabase } from '@/lib/supabase'
+import { useAlertContext } from '@/hooks/AlertProvider'
+import { fetchFacturas, fetchTiposComp, fmtNum } from '@/services/facturacion'
+import { insertEventLog } from '@/services/eventLog'
+import { supabase } from '@/lib/supabase'
 import type { Factura } from '@/types/database'
 const fmt = (n: number) => '$' + n.toLocaleString('es-CO', { minimumFractionDigits: 2 })
 
 export function FacturasInformePage() {
   const { profile } = useAuth(); const navigate = useNavigate()
+  const { confirm } = useAlertContext()
   const [facturas, setFacturas] = useState<any[]>([]); const [loading, setLoading] = useState(false)
   const [clases, setClases] = useState<{ codigo: string; nombre: string }[]>([])
   const [terceros, setTerceros] = useState<{ ide: number; nombre: string }[]>([])
@@ -34,7 +38,29 @@ export function FacturasInformePage() {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Comprobantes</h1>
       <FilterBar fields={filterFields} onSearch={loadData} onClear={() => setFacturas([])} loading={loading} />
-      <DataTable columns={columns} data={facturas} idKey="ide" loading={loading} onEditClick={(row) => navigate(`/dashboard/informes/facturas/${row.ide}`)} />
+      <DataTable columns={columns} data={facturas} idKey="ide" loading={loading}
+        onEditClick={(row) => navigate(`/dashboard/informes/facturas/${row.ide}`)}
+        onDelete={async (row: any) => {
+          if (!await confirm({ message: `¿Eliminar definitivamente la factura ${row.prefijo}-${fmtNum(row.consecutivo)}? Esta acción no se puede deshacer.`, confirmLabel: 'Eliminar' })) return
+          try {
+            const { data: fac } = await supabase.from('facturas').select('comprobante_ide').eq('emp_ide', profile?.emp_ide).eq('ide', row.ide).single()
+            await supabase.from('factura_pagos').delete().eq('emp_ide', profile?.emp_ide).eq('factura_ide', row.ide)
+            await supabase.from('factura_items').delete().eq('emp_ide', profile?.emp_ide).eq('factura_ide', row.ide)
+            if (fac?.comprobante_ide) {
+              await supabase.from('asientos_contables').delete().eq('emp_ide', profile?.emp_ide).eq('comprobante_ide', fac.comprobante_ide)
+              await supabase.from('comprobantes').delete().eq('emp_ide', profile?.emp_ide).eq('ide', fac.comprobante_ide)
+            }
+            await supabase.from('facturas').delete().eq('emp_ide', profile?.emp_ide).eq('ide', row.ide)
+            if (profile?.emp_ide && profile?.usu) {
+              await insertEventLog(profile.emp_ide, profile.usu, 'ELIMINAR', 'facturas', row.ide, { numero: `${row.prefijo}-${fmtNum(row.consecutivo)}`, total: row.total })
+            }
+            loadData()
+          } catch (err: any) {
+            alert(err?.message ?? 'Error al eliminar la factura')
+          }
+        }}
+        permisoEliminar="facturas.anular"
+      />
     </div>
   )
 }
