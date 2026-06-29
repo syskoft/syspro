@@ -28,7 +28,21 @@ const colorMap: Record<string, string> = {
   comprobantes: 'bg-blue-50 text-blue-600',
   'libro-mayor': 'bg-indigo-50 text-indigo-600',
   balance: 'bg-amber-50 text-amber-600',
-  'listas-precios': 'bg-green-50 text-green-700',
+  'definicion-cuentas': 'bg-sky-50 text-sky-600',
+  articulos: 'bg-orange-50 text-orange-600',
+  servicios: 'bg-cyan-50 text-cyan-600',
+  impuestos: 'bg-rose-50 text-rose-600',
+  terceros: 'bg-green-50 text-green-700',
+  'formas-pago': 'bg-purple-50 text-purple-600',
+  'listas-precios': 'bg-teal-50 text-teal-600',
+  'clases-comprobantes': 'bg-amber-50 text-amber-600',
+  'tipos-comprobante': 'bg-sky-50 text-sky-600',
+  vendedores: 'bg-green-50 text-green-700',
+  facturas: 'bg-blue-50 text-blue-600',
+  fp: 'bg-blue-50 text-blue-600',
+  pp: 'bg-amber-50 text-amber-600',
+  'facturas-informe': 'bg-blue-50 text-blue-600',
+  comprobantes: 'bg-blue-50 text-blue-600',
 }
 
 function Card({ item, onClick }: { item: SubModuleItem; onClick: () => void }) {

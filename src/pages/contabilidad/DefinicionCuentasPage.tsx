@@ -11,6 +11,7 @@ import type { PucCuenta } from '@/types/contabilidad'
 
 const tabs = [
   { id: 'impuestos', label: 'Impuestos' },
+  { id: 'transacciones', label: 'Transacciones' },
   { id: 'comerciales', label: 'Comerciales' },
   { id: 'financieros', label: 'Financieros' },
   { id: 'varios', label: 'Varios' },
