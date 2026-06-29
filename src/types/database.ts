@@ -173,4 +173,77 @@ export interface ArticuloPrecio {
   articulo?: Articulo
 }
 
+export interface Vendedor {
+  ide: number; emp_ide: string; tercero_ide: number; codigo: string
+  telefono: string | null; email: string | null; ina: boolean
+  created_at: string; updated_at: string; tercero?: Tercero
+}
+
+export interface Servicio {
+  ide: number; emp_ide: string; codigo: string; nombre: string
+  precio: number; ina: boolean; created_at: string; updated_at: string
+}
+
+export interface ComprobanteTipo {
+  ide: number; emp_ide: string; clase_codigo: string; codigo: string
+  nombre: string; descripcion: string | null; ina: boolean
+  created_at: string; updated_at: string
+}
+
+export interface Tercero {
+  ide: number; emp_ide: string; identificacion: string; dv: string | null
+  nombre: string; tipo: 'cliente' | 'proveedor' | 'ambos'
+  direccion: string | null; ciudad: string | null; departamento: string | null
+  telefono: string | null; email: string | null; regimen: string | null
+  ina: boolean; created_at: string; updated_at: string
+}
+
+export interface FormaPago {
+  ide: number; emp_ide: string; codigo: string; nombre: string
+  tipo: string | null; cuenta_puc_codigo: string | null; aplica_en: string[]
+  ina: boolean; created_at: string; updated_at: string
+}
+
+export interface FacturacionConfig {
+  emp_ide: string; cuenta_clientes: string | null; cuenta_ventas: string | null
+  cuenta_iva: string | null; cuenta_devoluciones: string | null; cuenta_descuentos: string | null
+  sig_consecutivo_factura: number
+}
+
+export interface Factura {
+  ide: number; emp_ide: string; tipo_comp: string; consecutivo: number; prefijo: string
+  tercero_ide: number; vendedor_ide: number | null; fecha: string; fecha_vencimiento: string | null
+  forma_pago_ide: number | null; concepto: string | null
+  sub_total: number; total_impuestos: number; total: number; saldo: number
+  estado: 'emitida' | 'pagada' | 'anulada'; comprobante_ide: number | null; ina: boolean
+  created_at: string; updated_at: string
+  tercero?: Tercero; forma_pago?: FormaPago; items?: FacturaItem[]
+}
+
+export interface FacturaItem {
+  ide: number; factura_ide: number; emp_ide: string
+  articulo_ide: number | null; servicio_ide: number | null
+  cantidad: number; precio_unitario: number; sub_total: number
+  iva_porcentaje: number; iva_valor: number; total: number
+  created_at: string; articulo?: Articulo
+}
+
+export interface Comprobante {
+  ide: number; emp_ide: string; consecutivo: number; fecha: string
+  concepto: string | null; origen_factura: number | null
+  estado: 'activo' | 'anulado'; created_at: string
+}
+
+export interface AsientoContable {
+  ide: number; comprobante_ide: number; emp_ide: string
+  cuenta_puc_codigo: string; detalle: string | null
+  debito: number; credito: number; created_at: string
+}
+
+export interface TipoComprobante {
+  codigo: string; nombre: string; descripcion: string | null
+  naturaleza: 'ingreso' | 'egreso' | 'nota'
+  requiere_vendedor: boolean; ina: boolean
+}
+
 export type UserRole = 'admin' | 'superadmin'
