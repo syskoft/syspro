@@ -2,6 +2,7 @@ import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
+import { ChatBot } from '@/components/ChatBot'
 import { Sidebar } from '@/components/Sidebar'
 import { TabBar } from '@/components/TabBar'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -37,6 +38,7 @@ export function DashboardLayout() {
           <Outlet />
         </div>
       </div>
+      <ChatBot />
     </div>
   )
 }

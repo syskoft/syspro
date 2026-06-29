@@ -9,6 +9,7 @@ import {
   LogOut,
   Monitor,
   Package,
+  Search,
   Shield,
   UserCog,
   Users,
@@ -28,7 +29,8 @@ type EmpresaMini = Pick<Emp, 'logo_url' | 'nom_com'>
 
 const ALL_MODULES = [
   { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { id: 'facturacion', label: 'Facturación', href: '/dashboard/facturacion', icon: FileText },
+  { id: 'facturacion', label: 'Transacciones', href: '/dashboard/facturacion', icon: FileText },
+  { id: 'utilidades', label: 'Utilidades', href: '/dashboard/utilidades', icon: Search },
   { id: 'catalogos', label: 'Catálogos', href: '/dashboard/catalogos', icon: ClipboardList },
   { id: 'contabilidad', label: 'Contabilidad', href: '/dashboard/contabilidad', icon: BookOpen },
   { id: 'inventarios', label: 'Inventarios', href: '/dashboard/inventarios', icon: Package },
