@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, dirname } from 'node:path'
 import { randomUUID } from 'node:crypto'
@@ -9,6 +9,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const BRANCH = 'deploy'
 const REPO = join(__dirname, '..')
 const TEMP = join(tmpdir(), `syspro-deploy-${randomUUID().slice(0, 8)}`)
+const BUILD_FILES = ['assets', 'index.html', '.htaccess']
 
 function run(cmd) {
   execSync(cmd, { cwd: REPO, stdio: 'inherit', shell: true })
@@ -22,63 +23,36 @@ function cleanTemp() {
   if (existsSync(TEMP)) rmSync(TEMP, { recursive: true, force: true })
 }
 
-// Save .env before we do anything destructive (git operations may delete it)
-const ENV_BAK = join(TEMP, '__env__')
-function saveEnv() {
-  const src = join(REPO, '.env')
-  if (existsSync(src)) { mkdirSync(TEMP, { recursive: true }); cpSync(src, ENV_BAK) }
-}
-function restoreEnv() {
-  const dst = join(REPO, '.env')
-  if (!existsSync(dst) && existsSync(ENV_BAK)) cpSync(ENV_BAK, dst)
-}
-
-// 1. Ensure deps are installed (git operations on Windows destroy node_modules)
-console.log('\n=== INSTALLING DEPS ===')
-run('npm install')
-
-// 2. Save .env immediately (build will use it from filesystem, backup protects against git clean)
-saveEnv()
-
-// 3. Build
+// 1. Build (NO npm install — preserves local node_modules)
 console.log('\n=== BUILDING ===')
 run('npm run build')
 
-// 4. Copy dist to temp
-console.log('\n=== COPYING BUILD TO TEMP ===')
+// 2. Copy build to temp
+console.log('\n=== COPYING BUILD ===')
 cleanTemp()
 mkdirSync(TEMP, { recursive: true })
 cpSync(join(REPO, 'dist'), TEMP, { recursive: true })
-// Re-save .env backup (build reads from filesystem, backup is already done above)
 
-// 3. Stash any WIP changes on main
-const status = runSilent('git status --porcelain')
-if (status) run('git stash push -m "auto-stash for deploy"')
+// 3. Switch to deploy branch
+console.log('\n=== SWITCHING TO DEPLOY ===')
+run(`git checkout ${BRANCH}`)
 
 try {
-  // 4. Switch to deploy branch
-  console.log('\n=== SWITCHING TO DEPLOY ===')
-  run(`git checkout ${BRANCH}`)
-
-  // 5. Delete all tracked files and untracked leftovers
-  const tracked = runSilent('git ls-files').split('\n').filter(Boolean)
-  if (tracked.length > 0) run('git rm -r --ignore-unmatch .')
-  run('git clean -fd')
-
-  // 6. Copy build files (DO NOT copy .env — it's not needed in deploy branch)
-  console.log('\n=== COPYING BUILD ===')
-  for (const f of readdirSync(TEMP)) {
-    if (f === '__env__') continue
-    cpSync(join(TEMP, f), join(REPO, f), { recursive: true })
+  // 4. Replace only build files (assets/, index.html, .htaccess)
+  //    Does NOT touch .env, node_modules, or any other local files
+  console.log('\n=== REPLACING BUILD FILES ===')
+  const replaceFiles = readdirSync(TEMP)
+  for (const f of replaceFiles) {
+    if (BUILD_FILES.includes(f)) {
+      const dest = join(REPO, f)
+      if (existsSync(dest)) rmSync(dest, { recursive: true, force: true })
+      cpSync(join(TEMP, f), dest, { recursive: true })
+    }
   }
 
-  // 7. Remove .env if git clean restored it (it should NOT be in the deploy branch)
-  const envDeploy = join(REPO, '.env')
-  if (existsSync(envDeploy) && readFileSync(envDeploy, 'utf-8').includes('SUPABASE')) rmSync(envDeploy)
-
-  // 7. Commit & push
+  // 5. Commit & push (solo los archivos del build)
   console.log('\n=== COMMITTING & PUSHING ===')
-  run('git add -A')
+  run('git add assets/ index.html .htaccess 2>nul; true')
   const hasChanges = runSilent('git status --porcelain').length > 0
   if (hasChanges) {
     const date = new Date().toISOString().slice(0, 16).replace('T', ' ')
@@ -87,13 +61,9 @@ try {
     console.log('\n\u2705 Deploy successful!')
   } else {
     console.log('\n\u2139\uFE0F No changes to deploy (same build as last commit)')
-    run('git push origin deploy') // force push in case remote diverged
   }
 } finally {
-  // 8. Back to main
-  restoreEnv()
+  // 6. Back to main — sin stash, sin env backup, limpio
   cleanTemp()
-  runSilent('git checkout main 2>nul')
-  const stashed = execSync('git stash list', { cwd: REPO, encoding: 'utf-8', shell: true }).toString().trim()
-  if (stashed.includes('auto-stash for deploy')) run('git stash pop')
+  run('git checkout main 2>nul')
 }
